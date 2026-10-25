@@ -1,0 +1,46 @@
+# Déploiement Render « Blueprint » : New + > Blueprint > choisir le dépôt GitHub.
+databases:
+  - name: tendra-db
+    plan: free            # gratuit pour tester ; passer à un plan payant avant le lancement (voir docs/DEPLOIEMENT.md)
+    databaseName: tendra
+    user: tendra
+
+services:
+  - type: web
+    name: tendra
+    runtime: node
+    plan: free            # se met en veille après inactivité ; passer à un plan payant pour les rappels et le lancement
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tendra-db
+          property: connectionString
+      - key: BASE_URL          # ex. https://tendra.onrender.com (puis ton vrai domaine)
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_PRICE_MONTHLY
+        sync: false
+      - key: STRIPE_PRICE_YEARLY
+        sync: false
+      - key: STRIPE_PRICE_PASS
+        sync: false
+      - key: VAPID_PUBLIC
+        sync: false
+      - key: VAPID_PRIVATE
+        sync: false
+      - key: VAPID_SUBJECT       # ex. mailto:contact@tondomaine.fr
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM          # ex. Tendra <no-reply@tondomaine.fr>
+        sync: false
+      - key: REVENUECAT_WEBHOOK_AUTH   # plus tard, pour les achats App Store / Google Play
+        sync: false

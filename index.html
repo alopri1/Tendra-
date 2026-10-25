@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tendra – coaching tendons</title>
+<meta name="theme-color" content="#0B1B3A">
+<meta name="description" content="Programmes de renforcement du tendon d’Achille et du tendon rotulien.">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<script src="/config.js"></script>
+<style>
+:root{--bg:#F6F7FB;--sf:#fff;--ink:#0B1B3A;--mu:#54627F;--pr:#2457F5;--on:#fff;--ln:#D8DEEC;--ok:#CFF3E3;--al:#FFD9CC;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0A1224;--sf:#121C36;--ink:#EAF0FF;--mu:#A5B4D6;--pr:#6D96FF;--on:#0A1224;--ln:#26345A;--ok:#14503B;--al:#5A2A1E}}
+:root[data-theme="dark"]{--bg:#0A1224;--sf:#121C36;--ink:#EAF0FF;--mu:#A5B4D6;--pr:#6D96FF;--on:#0A1224;--ln:#26345A;--ok:#14503B;--al:#5A2A1E}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,sans-serif}
+#app{max-width:440px;margin:0 auto;padding:20px 20px 100px}
+h1{font-size:28px;line-height:1.15;margin:16px 0 4px;font-weight:800}
+p{line-height:1.5;margin:6px 0}.mu{color:var(--mu)}.err{color:var(--ink);background:var(--al);border-radius:12px;padding:0 12px;font-weight:700}.err:not(:empty){padding:10px 12px}
+label{display:block;font-weight:700;font-size:14px;margin:12px 0}
+input[type=text],input[type=email],input[type=password],input[type=number]{display:block;width:100%;box-sizing:border-box;height:48px;margin-top:6px;border-radius:12px;border:2px solid var(--ln);background:var(--sf);color:var(--ink);padding:0 14px;font:500 16px Manrope,sans-serif}
+.ck{display:flex;gap:10px;align-items:flex-start;font-weight:500}.ck input,.ex input{width:22px;height:22px;flex:none;accent-color:var(--pr)}
+.card{background:var(--sf);border:1px solid var(--ln);border-radius:16px;padding:16px;margin:12px 0}
+.ex{display:flex;gap:12px;align-items:center;font-size:16px;font-weight:500;margin:10px 0}
+.btn{display:block;width:100%;min-height:52px;margin:12px 0;border:0;border-radius:14px;background:var(--pr);color:var(--on);font:800 16px Manrope,sans-serif;cursor:pointer}
+.btn.g{background:transparent;color:var(--ink);border:2px solid var(--ln)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.chip,.pn{min-height:44px;padding:0 16px;border-radius:22px;border:2px solid var(--ln);background:var(--sf);color:var(--ink);font:700 15px Manrope,sans-serif;cursor:pointer}
+.chip.on,.pn.on{background:var(--pr);color:var(--on);border-color:var(--pr)}
+.pg{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:10px}.pn{padding:0;border-radius:10px}
+.bar{height:10px;border-radius:5px;background:var(--ln);margin:6px 0}.bar i{display:block;height:10px;border-radius:5px;background:var(--pr)}
+.al,.ok{border-radius:14px;padding:12px 14px;font-weight:600;margin:12px 0}.al{background:var(--al)}.ok{background:var(--ok)}
+.row{display:flex;justify-content:space-between;gap:10px;font-size:14px;margin-top:8px}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--sf);border-top:1px solid var(--ln);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
+nav button{flex:1;min-height:48px;border:0;background:none;color:var(--mu);font:700 13px Manrope,sans-serif;cursor:pointer}nav button.on{color:var(--pr)}
+.top{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px}
+</style></head><body><div id="app"></div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const D0={screen:'welcome',user:null,profile:null,day:0,logs:[],tests:[],done:{},maxes:{}};
+const API_BASE=window.TENDRA_API||'',NATIVE=!!window.Capacitor;
+let ME=null,ENT=null,S=JSON.parse(JSON.stringify(D0)),F={q:[]},SYT=null,SYNC='local',MEDIA={};
+const LSK=()=>'tendra:'+(ME?ME.id:'anon');
+const save=()=>{S.u=Date.now();try{localStorage.setItem(LSK(),JSON.stringify(S))}catch(e){}pushState()};
+
+const go=s=>{S.screen=s;F.err='';save();render();window.scrollTo(0,0)};
+const fail=m=>{F.err=m;render()};
+const pick=(k,v)=>{F[k]=v;render()};
+const logo=z=>`<svg viewBox="0 0 96 96" width="${z}" height="${z}" role="img" aria-label="Logo Tendra"><rect x="1" y="1" width="94" height="94" rx="26" fill="#0B1B3A" stroke="#2B3F73" stroke-width="2"/><path d="M22 66L40 50L52 58L72 30" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="72" cy="30" r="8" fill="#FF7A59"/></svg>`;
+const X=r=>r.map(a=>({n:a[0],t:a[1],l:a[2],d:a[3],c:a[4],o:a[5]||'rmpv',w:a[6]||3}));
+const T={
+achille:{n:`Achille`,t:[`Montées sur pointes sur une jambe`,`répétitions`],x:X([
+[`Maintien isométrique sur pointes`,'I',1,`4 × 30 s, intensité modérée`,`Monte sur les pointes et tiens, talons à mi-hauteur.`,'rv',2],
+[`Isométrique une jambe, genou fléchi`,'I',2,`4 × 30 s, 60 à 70 % d’effort`,`Genou plié pour cibler le soléaire, tiens en haut.`,'rv',3],
+[`Maintien lesté sur pointes`,'I',3,`5 × 40 s, 70 à 80 % de ta charge max`,`Haltères en main, monte haut sur les pointes et tiens sans trembler.`,'rp',5],
+[`Isométrique surmontante sur pointes sous barre fixe`,'I',4,`5 × 5 s, 100 % d’effort`,`Pousse contre une barre bloquée : effort maximal, talons qui ne bougent pas.`,'rp',5],
+[`Montées sur pointes lentes`,'L',1,`3 × 12`,`Tempo 3-1-3, amplitude complète.`,'rm',2],
+[`Montées sur pointes lentes, amplitude maximale`,'L',2,`3 × 10, pause 2 s en bas`,`Descends le talon le plus bas possible, marque 2 s, remonte.`,'rm',3],
+[`Montées sur pointes une jambe`,'L',2,`3 × 10`,`Tempo 3-1-3, appui léger au mur.`,'rv',3],
+[`Montées genou fléchi`,'L',2,`3 × 12`,`Même tempo, genoux légèrement fléchis pour cibler le soléaire.`,'rv',3],
+[`Montées assis lestées (soléaire)`,'L',2,`3 × 15, 60 % de ta charge max`,`Assis, charge sur les genoux, monte les talons sans rebond.`,'rv',4],
+[`Montées assis très lestées (soléaire)`,'L',3,`4 × 8, 80 % de ta charge max`,`Charge lourde sur les genoux, tempo 3-1-3, amplitude complète.`,'r',5],
+[`Montées sur pointes lestées`,'L',3,`4 × 6, 80 % de ta charge max`,`Haltères en main, tempo 3-1-3, charge lourde mais propre.`,'rp',5],
+[`Montées sur pointes une jambe très lestées`,'L',4,`5 × 4, 85 % de ta charge max`,`Tempo 3-1-3, amplitude complète, charge très lourde mais propre.`,'rp',5],
+[`Pont fessier une jambe`,'L',2,`3 × 10`,`Descends en 3 s, remonte en 1 s, bassin stable.`,'v',3],
+[`Soulevé de terre roumain lourd`,'L',3,`4 × 6, 80 % de ta charge max`,`Dos plat, descente en 3 s, hanches en arrière.`,'rv',4],
+[`Poussée de traîneau lourd`,'L',3,`6 × 15 m`,`Corps incliné, pousse fort avec les pointes de pied.`,'rp',5],
+[`Poussée de traîneau très lourd`,'L',4,`8 × 10 m`,`Départ explosif, appuis puissants, repos complet.`,'p',5],
+[`Descente excentrique sur marche`,'E',2,`3 × 15`,`Monte à deux jambes, descends lentement sur une jambe, talon sous la marche.`,'rv',4],
+[`Excentrique lestée sur marche`,'E',3,`4 × 8, 70 % de ta charge max`,`Haltères en main, descente en 4 s, talon bien sous la marche.`,'r',5],
+[`Excentrique une jambe lestée sur marche`,'E',4,`4 × 6, 80 % de ta charge max`,`Monte à deux jambes, descends en 5 s sur une jambe, charge lourde.`,'r',5],
+[`Nordic assisté`,'E',2,`3 × 5`,`Freine avec les mains, stop si douleur au-dessus de 4/10.`,'v',3],
+[`Petits rebonds sur place`,'P',1,`3 × 15`,`Rebonds courts, genoux souples.`,'pv',2],
+[`Sauts à la corde`,'P',2,`4 × 30 s`,`Contacts brefs, talons qui ne touchent pas.`,'pv',3],
+[`Rebonds raides (pogos)`,'P',2,`4 × 20`,`Chevilles raides, contacts très brefs, talons qui ne touchent pas.`,'p',4],
+[`Sauts de haies basses`,'P',3,`4 × 6`,`Contacts au sol très brefs, réception souple.`,'p',4],
+[`Bonds alternés`,'P',3,`4 × 8`,`Poussée explosive, réception contrôlée.`,'p',4],
+[`Sprints en côte`,'P',3,`6 × 20 m`,`Corps incliné, poussée longue, récupération complète.`,'p',5],
+[`Sauts de haies réactifs`,'P',4,`5 × 5`,`Contact au sol le plus court possible, rebondis tout de suite.`,'p',5],
+[`Sauts en contrebas, rebond maximal`,'P',4,`5 × 5`,`Descends de la boîte, rebondis au plus vite et le plus haut possible.`,'p',5],
+[`Sprints lancés à 95 %`,'P',4,`5 × 30 m`,`Accélère puis garde la vitesse, épaules relâchées.`,'p',5],
+[`Mobilité de cheville au mur, genou fléchi`,'M',1,`2 × 10`,`Genou vers le mur, talon au sol, sans décoller le talon.`,'m',4],
+[`Mobilité de cheville au mur, genou tendu`,'M',1,`2 × 10`,`Jambe tendue, penche-toi vers le mur, talon au sol.`,'m',4],
+[`Mobilité de hanche`,'M',1,`2 × 10`,`Amplitude confortable, mouvements lents.`,'mv',3],
+[`Squat gobelet profond (mobilité)`,'M',2,`2 × 8`,`Descends le plus bas possible, talons au sol, coudes entre les genoux.`,'m',4],
+[`Fente profonde avec rotation`,'M',2,`2 × 8`,`Fente longue, ouvre le buste vers la jambe avant.`,'m',3],
+[`Gainage latéral`,'C',1,`3 × 30 s`,`Corps aligné des pieds à la tête.`,'v',2],
+[`Pont fessier`,'C',1,`3 × 12`,`Monte le bassin, serre les fessiers en haut.`,'v',2]])},
+rotulien:{n:`Rotulien`,t:[`Maintien chaise contre le mur`,`secondes`],x:X([
+[`Chaise contre le mur`,'I',1,`4 × 30 s, intensité modérée`,`Genoux vers 90°, dos plaqué au mur.`,'rv',2],
+[`Squat espagnol (isométrique)`,'I',2,`5 × 45 s, 70 % d’effort`,`Élastique derrière les genoux, tibias verticaux, buste droit.`,'rv',4],
+[`Chaise contre le mur lestée`,'I',3,`5 × 45 s, 70 à 80 % de ta charge max`,`Dos plaqué, cuisses à l’horizontale, charge sur les cuisses.`,'rp',4],
+[`Extension du genou isométrique maximale`,'I',4,`5 × 5 s, 100 % d’effort`,`Pousse le plus fort possible contre une résistance fixe, genou à 60°.`,'rp',5],
+[`Squat lent`,'L',1,`3 × 12`,`Tempo 3-1-3, genoux dans l’axe des pieds.`,'rm',2],
+[`Squat lent, amplitude maximale`,'L',2,`3 × 10, pause 2 s en bas`,`Descends le plus bas possible, marque 2 s, remonte sans rebond.`,'rm',3],
+[`Presse ou squat lesté`,'L',2,`4 × 8, 70 % de ta charge max`,`Charge modérée à lourde, tempo 3-1-3.`,'r',4],
+[`Squat lesté lourd`,'L',3,`4 × 6, 80 % de ta charge max`,`Descends en 3 s, remonte fort, dos neutre.`,'rp',5],
+[`Squat lesté très lourd`,'L',4,`5 × 3, 85 à 90 % de ta charge max`,`Barre bien calée, descente contrôlée, repos complet.`,'rp',5],
+[`Squat bulgare lent`,'L',2,`3 × 8 par jambe`,`Pied arrière sur un banc, buste droit, tempo lent.`,'rv',3],
+[`Squat bulgare lourd`,'L',3,`4 × 6 par jambe, 75 à 80 % de ta charge max`,`Pied arrière sur un banc, buste droit, genou avant stable.`,'rp',5],
+[`Fente arrière contrôlée`,'L',2,`3 × 10`,`Pas en arrière, genou avant stable.`,'rv',3],
+[`Montées sur marche`,'L',2,`3 × 10`,`Pousse avec la jambe sur la marche, descends lentement.`,'rv',3],
+[`Hip thrust lourd`,'L',3,`4 × 6, 80 % de ta charge max`,`Pousse fort avec les fessiers, menton rentré.`,'rv',4],
+[`Poussée de traîneau lourd`,'L',3,`6 × 15 m`,`Corps incliné, pousse fort avec les cuisses.`,'rp',5],
+[`Poussée de traîneau très lourd`,'L',4,`8 × 10 m`,`Départ explosif, appuis puissants, repos complet.`,'p',5],
+[`Squat excentrique sur plan incliné`,'E',2,`3 × 12`,`Talons surélevés, descends en 4 s.`,'rv',4],
+[`Descentes de marche lestées`,'E',3,`4 × 8, 60 % de ta charge max`,`Descente lente, genou stable, charge en main.`,'rv',4],
+[`Squat unijambiste incliné lesté`,'E',4,`4 × 6, 70 % de ta charge max`,`Talon surélevé, descente en 5 s, genou dans l’axe.`,'r',5],
+[`Nordic assisté`,'E',2,`3 × 5`,`Freine avec les mains, stop si douleur au-dessus de 4/10.`,'v',3],
+[`Petits sauts sur place`,'P',1,`3 × 10`,`Réception douce.`,'pv',2],
+[`Montées de genoux rapides`,'P',1,`4 × 15 s`,`Cadence vive, buste droit.`,'pv',2],
+[`Sauts groupés`,'P',2,`4 × 6`,`Montée explosive, réception amortie.`,'p',4],
+[`Sauts de haies réactifs`,'P',3,`4 × 6`,`Contacts brefs, genoux raides à la réception.`,'p',5],
+[`Sauts en contrebas`,'P',3,`4 × 5`,`Hauteur basse (20 à 30 cm), contact bref.`,'p',4],
+[`Bonds alternés`,'P',3,`4 × 8`,`Poussée explosive, réception contrôlée.`,'p',4],
+[`Sprints en côte`,'P',3,`6 × 20 m`,`Corps incliné, poussée longue, récupération complète.`,'p',5],
+[`Sauts en contrebas, rebond maximal`,'P',4,`5 × 5`,`Descends de la boîte, rebondis au plus vite et le plus haut possible.`,'p',5],
+[`Mobilité de hanche et de cheville`,'M',1,`2 × 10`,`Mouvements amples, sans douleur.`,'m',3],
+[`Mobilité de cheville au mur, genou fléchi`,'M',1,`2 × 10`,`Genou vers le mur, talon au sol, sans décoller le talon.`,'m',3],
+[`Squat gobelet profond (mobilité)`,'M',1,`2 × 8`,`Descends le plus bas possible, talons au sol, coudes entre les genoux.`,'m',4],
+[`Squat profond tenu`,'M',2,`3 × 20 s`,`Reste en bas, talons au sol, pousse les genoux vers l’extérieur.`,'m',4],
+[`Fente profonde avec rotation`,'M',2,`2 × 8`,`Fente longue, ouvre le buste vers la jambe avant.`,'m',3],
+[`Pont fessier`,'C',1,`3 × 12`,`Bassin haut, fessiers serrés.`,'v',2],
+[`Gainage latéral`,'C',1,`3 × 30 s`,`Corps aligné, respiration continue.`,'v',2]])}};
+const PH=[`Phase 1 · Isométrie : activer et charger`,`Phase 2 · Force lente : renforcer`,`Phase 3 · Énergie : explosivité et restitution`];
+const OB={ren:`Renforcer`,mob:`Mobilité et souplesse`,perf:`Explosivité`,prev:`Prévenir les blessures`};
+const QS=[`Douleur vive et soudaine, ou « claquement » ressenti récemment`,`Gonflement, rougeur ou chaleur importants`,`Impossible de t’appuyer dessus ou de le bouger normalement`,`Engourdissement ou fourmillements`,`Blessure ou opération il y a moins de 3 mois`,`Douleur intense la nuit ou au repos`];
+const OBS=p=>[].concat(p.obj||['ren']);
+const phase=w=>{let p=w<=2?0:w<=4?1:2;if(OBS(S.profile).every(o=>o==='mob'))p=Math.min(p,1);return p};
+const TY={I:`Isométrie`,L:`Force lente`,E:`Excentrique`,P:`Pliométrie`,M:`Mobilité`,C:`Chaîne et stabilité`};
+const TP={
+ren:[['IIM','ICM','IIC','ICM','IIM','ICC'],['LLC','LEM','LLC','ELC','LLM','LEC'],['LLE','LEC','LLC','ELL','LEC','LLM']],
+mob:[['MMI','MMC','MMI','MCM','MMI','MMC'],['MML','MMI','MCL','MMC','MML','MMI'],['MML','MMI','MCL','MMC','MML','MMI']],
+perf:[['IIC','IMC','IIM','ICM','IIC','IMC'],['LPC','LLP','LPM','LCP','LLP','LPC'],['PLP','LPC','PPL','LCP','PLP','LPM']],
+prev:[['IMC','IIC','IMC','ICM','IIC','IMC'],['LEC','LMC','ELC','LIC','LEM','LCM'],['LEC','LPC','ELC','LCM','LEP','LCC']]};
+const OC={ren:'r',mob:'m',perf:'p',prev:'v'};
+const mix=(pr,ph,di)=>{const os=OBS(pr),t=os.map(o=>(TP[o]||TP.ren)[ph][Math.min(di,5)]),n=t.length;if(n===1)return[...t[0]].map(ch=>[ch,os[0]]);const r=[];for(let k=0;k<4;k++){const q=t[k%n];r.push([q[(Math.floor(k/n)+k%n)%q.length],os[k%n]])}return r};
+const items=d=>{const pr=S.profile,cy=Math.floor(d/42),w=Math.floor((d%42)/7)+1,ph=phase(w),di=d%7,sl=mix(pr,ph,di);
+const mx=pr.age>=50?2:pr.lvl==='deb'?(ph==2?2:1):pr.lvl==='adv'?4:3,tg=Math.min(mx,ph+1+cy+(pr.lvl==='adv'?1:0)),used=[],l=[];
+sl.forEach(([t,ob],k)=>{const c=T[pr.tendon].x.filter(e=>e.t===t&&e.l<=mx&&!used.includes(e.n));if(!c.length)return;
+const sc=e=>(e.o.includes(OC[ob]||'r')?60:0)+e.w*10+(e.l===tg?25:e.l===tg-1?10:0);const cc0=c.filter(e=>e.o.includes(OC[ob]||'r')),cc=cc0.length>=2?cc0:c;cc.sort((u,v)=>sc(v)-sc(u));const top=cc.slice(0,Math.min(3,cc.length)),e=top[(w+di+k)%top.length];used.push(e.n);
+l.push([e.n,(pr.lvl==='deb'||pr.age>=50)?e.d.replace(/^(\d+) ×/,(m,n)=>`${Math.max(2,n-1)} ×`):e.d,`${TY[t]} · ${e.c}`])});
+if(pr.sport&&ph==2&&OBS(pr).some(o=>o!=='mob'))l.push([`Travail de vitesse contrôlée`,`Adapté à ton sport, intensité progressive`,`Vitesse · monte en vitesse petit à petit, geste propre.`]);
+if(OBS(pr).includes('mob'))l.push([`Mobilité guidée`,`5 min, amplitude confortable`,`Mobilité · mouvements lents, jamais en force.`]);
+return l};
+const disc=`<p class="mu" style="font-size:12px">Outil d’entraînement et de suivi. Il ne remplace pas un avis médical.</p>`;
+const V={};
+const AERR={email_taken:'Cette adresse e-mail est déjà utilisée.',invalid_email:'Adresse e-mail invalide.',invalid_password:'Mot de passe trop court (8 caractères minimum).',invalid_credentials:'E-mail ou mot de passe incorrect.',too_many_requests:'Trop de tentatives. Réessaie dans quelques minutes.',network:'Pas de connexion. Réessaie.',invalid_token:'Lien expiré ou déjà utilisé.'};
+const LEG=`<a href="/legal/terms.html" target="_blank" rel="noopener">conditions d’utilisation</a>`,LEGP=`<a href="/legal/privacy.html" target="_blank" rel="noopener">politique de confidentialité</a>`;
+V.welcome=()=>`<div style="padding-top:40px">${logo(88)}<h1 style="font-size:44px;letter-spacing:-1px">Tendra</h1><p class="mu" style="font-size:18px">Tendon d’Achille et tendon rotulien : des tendons solides, jour après jour. Un programme adapté à toi, un suivi simple, un test chaque semaine. 7 jours gratuits.</p></div><div style="margin-top:40px">${ME&&S.profile?`<button class="btn" onclick="go('home')">Continuer, ${esc(ME.name)}</button>`:`<button class="btn" onclick="go('signup')">Créer mon compte</button><button class="btn g" onclick="go('login')">J’ai déjà un compte</button>`}</div>${disc}<p class="mu" style="font-size:12px">${LEG} · ${LEGP}</p>`;
+V.signup=()=>`<h1>Crée ton compte</h1>
+<label>Prénom<input type="text" autocomplete="given-name" value="${esc(F.name)}" oninput="F.name=this.value"></label>
+<label>E-mail<input type="email" autocomplete="email" value="${esc(F.email)}" oninput="F.email=this.value"></label>
+<label>Mot de passe (8 caractères minimum)<input type="password" autocomplete="new-password" oninput="F.pw=this.value"></label>
+<label class="ck"><input type="checkbox" ${F.c1?'checked':''} onchange="F.c1=this.checked"><span>J’accepte les ${LEG} et la ${LEGP}, et je consens au traitement des données de forme et de douleur que je saisis, pour personnaliser mes séances.</span></label>
+<label class="ck"><input type="checkbox" ${F.c2?'checked':''} onchange="F.c2=this.checked"><span>Je comprends que Tendra est un outil d’entraînement et de suivi, et qu’il ne remplace pas un avis médical.</span></label>
+<p class="err">${esc(F.err)}</p><button class="btn" onclick="signup()">${F.busy?'Un instant…':'Continuer'}</button><button class="btn g" onclick="go('welcome')">Retour</button>`;
+async function signup(){if(F.busy)return;const n=(F.name||'').trim(),e=(F.email||'').trim();
+if(!n)return fail(`Entre ton prénom.`);if(!/^\S+@\S+\.\S+$/.test(e))return fail(`Entre un e-mail valide.`);
+if((F.pw||'').length<8)return fail(`Le mot de passe doit faire au moins 8 caractères.`);
+if(!F.c1||!F.c2)return fail(`Coche les deux cases pour continuer.`);
+F.busy=true;F.err='';render();const r=await API('/auth/register',{method:'POST',body:{name:n,email:e,password:F.pw}});F.busy=false;
+if(!r.ok)return fail(AERR[r.j.error]||`Inscription impossible pour le moment.`);F.pw='';await afterAuth(r.j);go('safety')}
+V.login=()=>`<h1>Se connecter</h1>${F.msgL?`<div class="ok">${esc(F.msgL)}</div>`:''}<label>E-mail<input type="email" autocomplete="email" value="${esc(F.email)}" oninput="F.email=this.value"></label><label>Mot de passe<input type="password" autocomplete="current-password" oninput="F.pw=this.value"></label><p class="err">${esc(F.err)}</p><button class="btn" onclick="login()">${F.busy?'Un instant…':'Me connecter'}</button><button class="btn g" onclick="go('forgot')">Mot de passe oublié</button><button class="btn g" onclick="go('welcome')">Retour</button>`;
+async function login(){if(F.busy)return;const e=(F.email||'').trim();if(!e||!F.pw)return fail(`Entre ton e-mail et ton mot de passe.`);
+F.busy=true;F.err='';render();const r=await API('/auth/login',{method:'POST',body:{email:e,password:F.pw}});F.busy=false;
+if(!r.ok)return fail(AERR[r.j.error]||`Connexion impossible pour le moment.`);F.pw='';F.msgL='';await afterAuth(r.j);go(S.profile?'home':'safety')}
+V.forgot=()=>`<h1>Mot de passe oublié</h1><p class="mu">Entre ton e-mail : si un compte existe, tu reçois un lien pour choisir un nouveau mot de passe.</p><label>E-mail<input type="email" value="${esc(F.email)}" oninput="F.email=this.value"></label>${F.sent?`<div class="ok">Si un compte existe, un e-mail vient d’être envoyé.</div>`:''}<p class="err">${esc(F.err)}</p><button class="btn" onclick="forgot()">Envoyer le lien</button><button class="btn g" onclick="go('login')">Retour</button>`;
+async function forgot(){const e=(F.email||'').trim();if(!/^\S+@\S+\.\S+$/.test(e))return fail(`Entre un e-mail valide.`);const r=await API('/auth/forgot',{method:'POST',body:{email:e}});if(r.status===429)return fail(AERR.too_many_requests);F.sent=true;F.err='';render()}
+V.reset=()=>`<h1>Nouveau mot de passe</h1><label>Mot de passe (8 caractères minimum)<input type="password" autocomplete="new-password" oninput="F.pw=this.value"></label><p class="err">${esc(F.err)}</p><button class="btn" onclick="doReset()">Enregistrer</button>`;
+async function doReset(){if((F.pw||'').length<8)return fail(`Le mot de passe doit faire au moins 8 caractères.`);const r=await API('/auth/reset',{method:'POST',body:{token:F.rtoken,password:F.pw}});if(!r.ok)return fail(AERR[r.j.error]||`Impossible de modifier le mot de passe.`);F.pw='';F.msgL='Mot de passe modifié. Connecte-toi.';go('login')}
+V.safety=()=>`<h1>Avant de commencer</h1><div class="card"><label class="ck"><input type="checkbox" ${F.okd?'checked':''} onchange="F.okd=this.checked"><span>Je n’ai pas de blessure en cours sur le tendon que je vais entraîner. Si j’en ai une, je demande l’avis d’un professionnel avant de m’entraîner.</span></label></div><button class="btn" onclick="F.okd?go('profile'):go('stop')">Continuer</button>`;
+V.stop=()=>`<h1>Un avis professionnel d’abord</h1><div class="al">Demande l’avis d’un médecin ou d’un kinésithérapeute avant de t’entraîner, puis reviens.</div><button class="btn g" onclick="go('safety')">Revenir</button>`;
+V.profile=()=>`<h1>Ton profil</h1><b>Tendon</b><div class="chips">${Object.keys(T).map(k=>`<button class="chip${F.tendon===k?' on':''}" onclick="pick('tendon','${k}')">${T[k].n}</button>`).join('')}</div>
+<b>Objectifs (un ou plusieurs)</b><div class="chips">${Object.keys(OB).map(k=>`<button class="chip${(F.obj||[]).includes(k)?' on':''}" onclick="tg('obj','${k}')">${OB[k]}</button>`).join('')}</div>
+<b>Niveau</b> <span class="mu" style="font-size:12px">(Avancé : charges lourdes, pour pratiquants expérimentés)</span><div class="chips">${[['deb','Débutant'],['conf','Confirmé'],['adv','Avancé']].map(([k,t])=>`<button class="chip${F.lvl===k?' on':''}" onclick="pick('lvl','${k}')">${t}</button>`).join('')}</div>
+<label>Âge<input type="number" inputmode="numeric" value="${esc(F.age)}" oninput="F.age=this.value"></label>
+<label class="ck"><input type="checkbox" ${F.sp?'checked':''} onchange="pick('sp',this.checked)"><span>Je pratique un sport</span></label>
+${F.sp?`<label>Lequel ?<input type="text" value="${esc(F.sport)}" oninput="F.sport=this.value"></label>`:''}
+<p class="err">${esc(F.err)}</p><button class="btn" onclick="mkProfile()">Créer mon programme</button>`;
+function tg(k,v){F[k]=F[k]||[];const i=F[k].indexOf(v);if(i<0)F[k].push(v);else F[k].splice(i,1);render()}
+function mkProfile(){const a=+F.age;if(!F.tendon)return fail(`Choisis un tendon.`);if(!(F.obj&&F.obj.length))return fail(`Choisis au moins un objectif.`);if(!F.lvl)return fail(`Choisis ton niveau.`);
+if(!(a>=16&&a<=90))return fail(`Tendra est réservé aux 16 ans et plus (âge entre 16 et 90).`);
+S.profile={tendon:F.tendon,obj:F.obj.slice(),lvl:F.lvl,age:a,sport:F.sp?(F.sport||'sportif'):''};S.day=0;S.logs=[];S.tests=[];S.done={};go('plan')}
+V.plan=()=>{const p=S.profile;let h=`<h1>Ton plan sur 6 semaines</h1><p class="mu">${T[p.tendon].n} · ${OBS(p).map(o=>OB[o]).join(' + ')}${p.sport?' · '+esc(p.sport):''}</p>`;
+const w=[[`Semaines 1-2`,0],[`Semaines 3-4`,1],[`Semaines 5-6`,2]];
+w.forEach(([t,i])=>{const ph=OBS(p).every(o=>o==='mob')?Math.min(i,1):i;h+=`<div class="card"><b>${t}</b><p class="mu">${PH[ph]}</p>${items(i*14).map(x=>`<div class="row"><span>${x[0]}</span><span class="mu">${x[1]}</span></div>`).join('')}</div>`});
+return h+`<p class="mu">Une séance par jour, et un test le 7ᵉ jour de chaque semaine.${p.lvl==='deb'||p.age>=50?' Une série en moins sur chaque exercice pour démarrer en douceur.':''}</p><button class="btn" onclick="go('home')">${S.day>0?'Retour au programme':'Commencer'}</button>${disc}`};
+const level=l=>{const sc=l.sleep+l.energy+l.mood;return l.pain>=5||sc===0?'rest':(l.pain>=3||sc<=2)?'light':'full'};
+const REST=[[`Mobilité douce`,`5 à 8 min`,`Amplitude confortable, aucun effort.`],[`Respiration et relâchement`,`3 min`,`Allongé, respire lentement.`]];
+const adapt=(a,lv)=>lv==='rest'?REST:lv==='light'?a.filter(x=>!/^(Pliométrie|Vitesse)/.test(x[2])&&!/nordic/i.test(x[0])).map(x=>[x[0],x[1].replace(/^(\d+) ×/,(m,n)=>`${Math.max(2,n-1)} ×`),x[2]]):a;
+const opt=(k,a,v)=>a.map((t,i)=>`<button class="chip${v===i?' on':''}" onclick="ci('${k}',${i})">${t}</button>`).join('');
+V.home=()=>{const d=S.day;if(F.rate)return `<h1>Séance terminée</h1>${F.dur?`<p>Durée : <b>${F.dur}</b></p>`:''}${Object.values(S.maxes||{}).some(v=>v>0)?`<p class="mu" style="margin:8px 0 4px">Les charges étaient…</p><div class="chips">${[['up','Trop légères'],['ok','Bonnes'],['dn','Trop lourdes']].map(([k,t])=>`<button class="chip${(F.lf||'ok')===k?' on':''}" onclick="pick('lf','${k}')">${t}</button>`).join('')}</div>`:''}<p class="mu">Quelle difficulté as-tu ressentie ? (1 = très facile, 10 = effort maximal)</p><div class="card"><div class="pg">${Array.from({length:10},(_,i)=>`<button class="pn" onclick="rate(${i+1})">${i+1}</button>`).join('')}</div></div>`;
+const cy=Math.floor(d/42),w=Math.floor((d%42)/7)+1,p=phase(w),tst=d%7==6,l=S.logs.find(x=>x.d==d)||{},t0=T[S.profile.tendon];
+const pv=S.logs.find(x=>x.d==d-1)||{};const ok=l.sleep!=null&&l.energy!=null&&l.mood!=null&&(l.hp!==1||l.pain!=null),lv=ok?(level(l)==='full'&&pv.rpe>=9?'light':level(l)):null;
+let h=`<p class="mu" style="margin-top:8px">${t0.n} · ${cy>0?'cycle '+(cy+1)+' · ':''}semaine ${w} · jour ${d%7+1}</p><h1>${ok?(tst?'Jour de test':'Programme du jour'):'Check-in avant la séance'}</h1><div class="bar"><i style="width:${Math.round((d%42)/42*100)}%"></i></div><p class="mu">${PH[p]}${streak()>0?` · Série de ${streak()} jour${streak()>1?'s':''}`:''}</p>${F.msg?`<div class="ok">${esc(F.msg)}</div>`:''}${(r=>r&&!doneToday()?`<div class="ok">${r.late?'C’est l’heure de ta séance (prévue à '+r.t+').':'Séance prévue à '+r.t+'.'}</div>`:'')(remDue())}`;
+h+=(d>0&&d%42===0&&!(S.cyc||{})[d]?`<div class="card"><b>Nouveau cycle ${cy+1}</b><p class="mu">Bravo, tu as fini 6 semaines. Le programme monte d’un cran. Tes charges peuvent augmenter de 5 %.</p><button class="btn" onclick="cyc(true)">Monter mes charges de 5 %</button><button class="btn g" onclick="cyc(false)">Garder mes charges</button></div>`:'')+`<div class="card"><b>Sommeil</b><div class="chips">${opt('sleep',['Mauvais','Moyen','Bon'],l.sleep)}</div><p style="margin:12px 0 4px"><b>Énergie</b></p><div class="chips">${opt('energy',['Faible','Moyenne','Haute'],l.energy)}</div><p style="margin:12px 0 4px"><b>Humeur</b></p><div class="chips">${opt('mood',['Bas','Neutre','Bonne'],l.mood)}</div><p style="margin:12px 0 4px"><b>Douleur ?</b></p><div class="chips">${opt('hp',['Non','Oui'],l.hp==null?0:l.hp)}</div>${l.hp===1?`<p style="margin:12px 0 4px"><b>Intensité (1 à 10)</b></p><div class="pg">${Array.from({length:10},(_,i)=>`<button class="pn${l.pain===i+1?' on':''}" onclick="ci('pain',${i+1})">${i+1}</button>`).join('')}</div>`:''}</div>`;
+if(!ok)return h+`<div class="ok">Réponds à ces questions pour recevoir ton programme adapté.</div>`+disc;
+h+=lv==='rest'?`<div class="al">Séance de récupération aujourd’hui : mobilité douce, sans charge.${tst?' Le test est reporté.':''}</div>`:lv==='light'?`<div class="ok">Programme allégé${pv.rpe>=9?' (séance d’hier très dure)':''} : une série en moins, sans impacts ni vitesse.</div>`:`<div class="ok">Tout est au vert : programme complet.${pv.rpe<=4?' Hier était facile : tu peux monter un peu la charge.':''}</div>`;
+if(tst&&lv!=='rest'){const pr=S.tests[S.tests.length-1];h+=`<div class="card"><b>${t0.t[0]}</b><p class="mu">Fais le maximum de ${t0.t[1]} et arrête dès que la gêne dépasse 4/10.</p>${pr?`<p>Dernier résultat : <b>${pr.v}</b></p>`:''}<input type="number" inputmode="numeric" min="0" placeholder="Ton résultat" value="${esc(F.t)}" oninput="F.t=this.value"></div><p class="err">${esc(F.err)}</p><button class="btn" onclick="saveTest()">Enregistrer le test</button>`}
+else{const dn=S.done[d]||[];h+=adapt(items(d),lv).map((x,i)=>`<label class="card ex"><input type="checkbox" ${dn[i]?'checked':''} onchange="tick(${i})"><span><b>${x[0]}</b><br><span class="mu">${x[1]}</span><br><span class="mu" style="font-size:13px">${x[2]||''}</span></span></label>`).join('')+`<p class="err">${esc(F.err)}</p><button class="btn" onclick="startSession()">Démarrer la séance guidée</button><button class="btn g" onclick="finish()">Terminer sans suivi</button>`}
+return h+disc};
+function ci(k,v){let l=S.logs.find(x=>x.d==S.day);if(!l){l={d:S.day};S.logs.push(l)}l[k]=v;if(k==='hp')l.pain=v===0?0:undefined;F.err='';F.msg='';save();render()}
+function tick(i){const k=S.day;S.done[k]=S.done[k]||[];S.done[k][i]=!S.done[k][i];save();render()}
+function finish(){const l=S.logs.find(x=>x.d==S.day)||{};if(l.sleep==null||l.energy==null||l.mood==null||(l.hp===1&&l.pain==null))return fail(`Réponds d’abord aux questions avant la séance.`);
+if(S.day%7==6&&level(l)==='rest'){S.logs=S.logs.filter(x=>x.d!=S.day);F.msg=`Test reporté. Refais ton check-in quand tu te sens prêt.`;return go('home')}
+l.date=tdy();F.dur='';F.rate=true;save();render();window.scrollTo(0,0)}
+function rate(n){const l=S.logs.find(x=>x.d==S.day);if(l)l.rpe=n;const k={up:1.05,ok:1,dn:.925}[F.lf||'ok'],m=S.maxes||{};if(k!==1)Object.keys(m).forEach(nn=>{if(m[nn]>0)m[nn]=Math.round(m[nn]*k*2)/2});F.lf='ok';F.rate=false;F.dur='';S.day++;go('home')}
+function saveTest(){if(F.t===''||F.t==null||!(+F.t>=0))return fail(`Entre ton résultat.`);S.tests.push({w:Math.floor(S.day/7)+1,v:+F.t});F.t='';F.rate=true;save();render();window.scrollTo(0,0)}
+V.progress=()=>{const mx=Math.max(1,...S.tests.map(t=>t.v));let h=`<h1>Progrès</h1><div class="card"><b>${S.day} séances · cycle ${Math.floor(S.day/42)+1}</b><div class="bar"><i style="width:${Math.round((S.day%42)/42*100)}%"></i></div></div>`;
+h+=`<div class="card"><b>Tests hebdomadaires</b>${S.tests.length?S.tests.map(t=>`<div class="row"><span>Semaine ${t.w}</span><b>${t.v}</b></div><div class="bar"><i style="width:${Math.round(t.v/mx*100)}%"></i></div>`).join(''):`<p class="mu">Ton premier test arrive le 7ᵉ jour.</p>`}</div>`;
+const pl=S.logs.filter(x=>x.pain!=null).slice(-14);h+=`<div class="card"><b>Gêne (14 derniers jours)</b>${pl.length?pl.map(x=>`<div class="row"><span>Jour ${x.d+1}</span><b>${x.pain}/10</b></div><div class="bar"><i style="width:${x.pain*10}%"></i></div>`).join(''):`<p class="mu">Aucune donnée pour l’instant.</p>`}</div>`;const rl=S.logs.filter(x=>x.rpe);h+=`<div class="card"><b>Difficulté des séances</b>${rl.length?rl.slice(-14).map(x=>`<div class="row"><span>Jour ${x.d+1}</span><b>${x.rpe}/10</b></div><div class="bar"><i style="width:${x.rpe*10}%"></i></div>`).join(''):`<p class="mu">Note ta première séance pour la voir ici.</p>`}</div>`;const dl=S.logs.filter(x=>x.dur);h+=`<div class="card"><b>Durée des séances guidées</b>${dl.length?dl.slice(-14).map(x=>`<div class="row"><span>Jour ${x.d+1}</span><b>${fmt(x.dur)}</b></div>`).join(''):`<p class="mu">Lance une séance guidée pour voir sa durée.</p>`}</div>`;const wk=S.logs.filter(x=>x.rpe!=null).slice(-7);if(wk.length){const rp=wk.reduce((a_,x)=>a_+x.rpe,0)/wk.length,fw=wk.filter(x=>x.sleep!=null),fa=fw.length?Math.round(fw.reduce((a_,x)=>a_+(x.sleep+x.energy+x.mood)/6*100,0)/fw.length):null,sl=fw.length?fw.reduce((a_,x)=>a_+x.sleep,0)/fw.length:2,tip=rp>=8.5?`Semaine très intense : garde un jour plus léger et soigne ta récupération.`:sl<.8?`Ton sommeil est bas : c’est la priorité pour que tes tendons s’adaptent.`:rp<=4.5?`Séances faciles : tu peux monter les charges (choisis « Trop légères » en fin de séance).`:`Bon équilibre entre effort et récupération. Continue comme ça.`;h+=`<div class="card"><b>Bilan des ${wk.length} dernières séances</b><div class="row"><span>Difficulté moyenne</span><b>${rp.toFixed(1)}/10</b></div>${fa!=null?`<div class="row"><span>Forme moyenne</span><b>${fa} %</b></div>`:''}<p class="mu" style="margin-top:10px">${tip}</p></div>`}return h};
+V.me=()=>{const p=S.profile;return `<h1>Profil</h1><div class="card"><b>${esc(ME.name)}</b><p class="mu">${esc(ME.email)}</p><p>${T[p.tendon].n} · ${OBS(p).map(o=>OB[o]).join(' + ')} · ${p.age} ans · ${({deb:'Débutant',conf:'Confirmé',adv:'Avancé'})[p.lvl]||'Confirmé'}${p.sport?' · '+esc(p.sport):''}</p></div>
+<div class="card"><b>Rappel quotidien</b><label class="ck" style="margin:8px 0"><input type="checkbox" ${S.rem&&S.rem.on?'checked':''} onchange="setRem(this.checked)"><span>Me rappeler ma séance</span></label><input type="time" value="${S.rem?S.rem.t:'18:00'}" onchange="setRemT(this.value)" style="display:block;width:100%;box-sizing:border-box;height:48px;border-radius:12px;border:2px solid var(--ln);background:var(--sf);color:var(--ink);padding:0 14px;font:500 16px Manrope,system-ui,sans-serif"><p class="mu" style="font-size:12px">Le rappel arrive par notification, même quand Tendra est fermé, si tu autorises les notifications.</p></div>
+<div class="card"><b>Sauvegarde</b><p class="mu">${SYNC==='cloud'?'Sauvegardée sur ton compte et synchronisée entre tes appareils.':'Hors ligne : tes données seront envoyées dès que la connexion revient.'}</p></div>
+<div class="card"><b>Abonnement</b><p class="mu">${statusText()}</p><button class="btn g" onclick="go('paywall')">Voir les offres</button>${ENT&&ENT.canManage?`<button class="btn g" onclick="portal()">Gérer mon abonnement</button>`:''}</div>
+<button class="btn g" onclick="go('plan')">Voir mon plan</button>
+<div class="card"><b>Mes données</b><button class="btn g" onclick="exportData()">Télécharger mes données</button><button class="btn g" onclick="delAcc()">Supprimer mon compte</button><p class="mu" style="font-size:12px">${LEGP} · ${LEG}</p></div>
+<p class="err">${esc(F.err)}</p><button class="btn g" onclick="logout()">Se déconnecter</button>${disc}`};
+async function exportData(){try{const r=await fetch(API_BASE+'/api/export',{headers:hdr(),credentials:NATIVE?'omit':'same-origin'});if(!r.ok)throw 0;const b=await r.blob(),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='tendra-donnees.json';document.body.appendChild(a);a.click();a.remove()}catch(e){fail(`Export impossible pour le moment.`)}}
+function wipeLocal(){['tendra_token','tendra_me','tendra_ent'].forEach(k=>localStorage.removeItem(k));if(ME)localStorage.removeItem(LSK());ME=null;ENT=null;S=fresh();F={q:[]}}
+async function logout(){await API('/auth/logout',{method:'POST',body:{}});wipeLocal();go('welcome')}
+async function delAcc(){if(!confirm('Supprimer définitivement ton compte et toutes tes données ? Cette action est irréversible.'))return;const r=await API('/account',{method:'DELETE'});if(r.ok){wipeLocal();go('welcome')}else fail(`Suppression impossible pour le moment.`)}
+const PAT={
+calf:[[0,0,0,0,0,10,10,10,0,0],[0,0,0,0,0,10,10,10,55,0],'a'],
+squat:[[0,0,0,0,0,70,70,70,0,0],[38,100,-15,100,-15,70,70,70,0,0],'a'],
+lunge:[[0,0,0,0,0,10,10,10,0,0],[0,75,0,-5,-80,10,10,10,0,0],'a'],
+bridge:[[-95,125,5,125,5,90,90,90,0,0],[-118,150,10,150,10,90,90,90,0,0],'a'],
+push:[[70,-70,-70,-70,-70,0,0,0,70,0],[80,-80,-80,-80,-80,-35,10,10,70,0],'a'],
+plank:[[85,-85,-85,-85,-85,0,90,90,70,0],[85,-85,-85,-85,-85,0,90,90,70,0],'a'],
+hinge:[[0,0,0,0,0,0,0,0,0,0],[75,12,-8,12,-8,0,0,0,0,0],'a'],
+nordic:[[0,0,-88,0,-88,70,70,70,0,0],[75,-75,-88,-75,-88,80,80,80,0,0],'a'],
+curl:[[0,0,0,0,0,10,10,10,0,0],[0,0,0,0,-100,10,10,10,0,0],'f'],
+lat:[[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,85,85,85,0,0],'f'],
+rot:[[0,0,0,0,0,0,90,90,0,0],[0,0,0,0,0,0,30,30,0,0],'f'],
+press:[[0,0,0,0,0,50,170,170,0,0],[0,0,0,0,0,175,178,178,0,0],'f'],
+row:[[5,0,0,0,0,85,85,85,0,0],[5,0,0,0,0,-30,40,40,0,0],'f'],
+jump:[[20,70,-10,70,-10,-45,-45,-45,0,0],[0,0,0,0,0,100,115,115,60,12],'h'],
+run:[[8,95,0,-30,-55,70,70,70,50,0],[8,-30,-55,95,0,-50,-20,-20,50,0],'h'],
+wrist:[[0,0,0,0,0,0,88,88,0,0],[0,0,0,0,0,0,88,20,0,0],'f'],
+circle:[[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,170,170,170,0,0],'f'],
+abd:[[0,0,0,0,0,0,0,0,0,0],[0,0,0,45,45,0,0,0,0,0],'f'],
+hipmob:[[0,0,0,0,0,0,0,0,0,0],[0,0,0,85,10,0,0,0,0,0],'f'],
+throw:[[-12,0,0,0,0,-80,-100,-100,0,0],[20,0,0,0,0,95,105,105,0,0],'f']};
+['bridge','push','plank','nordic'].forEach(k=>PAT[k][2]='c');
+Object.assign(PAT,{
+seatedcalf:[[0,90,0,90,0,35,35,35,0,0],[0,101,0,101,0,35,35,35,50,0],'a'],
+spanish:[[0,0,0,0,0,10,10,10,0,0],[-14,68,-2,68,-2,40,40,40,0,0],'a'],
+wallsit:[[0,30,30,30,30,10,10,10,0,0],[0,90,0,90,0,45,45,45,0,0],'h'],
+stepdn:[[0,0,0,5,5,0,0,0,0,32],[0,75,-10,0,0,50,50,50,0,0],'f'],
+calfstep:[[0,0,0,0,0,10,10,10,60,24],[0,0,0,0,0,10,10,10,-30,24],'a','toe'],
+bulg:[[0,0,0,-18,-80,10,10,10,0,0],[4,65,-5,-48,-95,10,10,10,0,0],'f'],
+sled:[[58,70,0,-38,-58,100,108,108,50,0],[58,-38,-58,70,0,100,108,108,50,0],'h'],
+wallpush:[[8,0,0,0,0,20,20,20,0,0],[8,0,0,0,0,88,88,88,0,0],'f']});
+const PRULES=[[/assis/,['bench:seat','db:knee']],[/espagnol/,['band:knees']],[/chaise contre le mur/,['wall:back']],[/cheville au mur/,['wall:front']],[/poussée isométrique/,['wall:hands']],[/excentrique.*marche/,['box:toe','db']],[/marche/,['box:foot']],[/bulgare/,['bench:rear','db']],[/traîneau|traineau/,['sled']],[/squat lesté|presse ou squat/,['bar:sh']],[/hip thrust|pont fessier isométrique lourd/,['bar:hip']],[/soulevé|développé/,['bar:hn']],[/haies/,['hurdle']],[/balle|ballon/,['ball']],[/élastique|barre flexible/,['band']],[/lest/,['db']]];
+const propsOf=n=>{n=n.toLowerCase();const r=PRULES.find(x=>x[0].test(n));return r?r[1]:[]};
+const RULES=[[/assis/,'seatedcalf'],[/espagnol/,'spanish'],[/chaise contre le mur/,'wallsit'],[/traîneau|traineau/,'sled'],[/excentrique.*marche/,'calfstep'],[/montées sur marche|descentes de marche/,'stepdn'],[/bulgare/,'bulg'],[/poussée isométrique/,'wallpush'],[/hip thrust/,'bridge'],[/mobilité de cheville/,'lunge'],[/isométrique une jambe|pointes/,'calf'],[/rebonds de (ballon|balle)|lancers|réception de balle/,'throw'],[/saut|rebond|bond|corde|haies/,'jump'],[/pompes|décollage/,'push'],[/gainage/,'plank'],[/nordic/,'nordic'],[/curl/,'curl'],[/pont fessier/,'bridge'],[/soulevé|charnière/,'hinge'],[/fente|bulgare|marche|pas latéraux/,'lunge'],[/squat|chaise|presse|extension du genou|plan incliné/,'squat'],[/^abduction excentrique$|élévation|maintien bras/,'lat'],[/abduction/,'abd'],[/rotation externe|rotation avec barre/,'rot'],[/développé/,'press'],[/rowing/,'row'],[/poignet|supination|marteau|barre flexible|serrage|prise en statique|flexion excentrique|extension excentrique/,'wrist'],[/omoplate|mobilité guidée|respiration|mobilité douce/,'circle'],[/mobilité de hanche/,'hipmob'],[/genoux rapides|accélér|sprint|course|vitesse/,'run']];
+const patOf=n=>{n=n.toLowerCase();const r=RULES.find(x=>x[0].test(n));return r?r[1]:'squat'};
+const parse=d=>{let m;
+if(m=d.match(/(\d+) × (\d+) s\b/))return{sets:+m[1],mode:'hold',n:+m[2]};
+if(m=d.match(/(\d+) × (\d+) m\b/))return{sets:+m[1],mode:'dist',n:+m[2]};
+if(m=d.match(/(\d+) × (\d+)/))return{sets:+m[1],mode:'reps',n:+m[2]};
+if(m=d.match(/(\d+)(?: à \d+)? min/))return{sets:1,mode:'hold',n:+m[1]*60};
+return{sets:1,mode:'reps',n:10}};
+const RT={'Isométrie':45,'Force lente':90,'Excentrique':90,'Pliométrie':75,'Mobilité':20,'Chaîne et stabilité':45,'Vitesse':90};
+const TPO={'Force lente':[3,1,3],'Excentrique':[1,0,4],'Pliométrie':[.5,0,.5],'Mobilité':[2,1,2],'Chaîne et stabilité':[2,0,2],'Vitesse':[.4,0,.4],'Isométrie':[2,1,2]};
+const lvOf=d=>{const l=S.logs.find(x=>x.d==d)||{},pv=S.logs.find(x=>x.d==d-1)||{},b=level(l);return b==='full'&&pv.rpe>=9?'light':b};
+const fmt=s=>`${Math.floor(s/60)}:${String(Math.round(s)%60).padStart(2,'0')}`;
+const ease=t=>t*t*(3-2*t),rad=a=>a*Math.PI/180;
+let G={on:false};
+const hdr=()=>{const h={'Content-Type':'application/json'};if(NATIVE){h['X-Client']='native';const t=localStorage.getItem('tendra_token');if(t)h.Authorization='Bearer '+t}return h};
+async function API(p,o={}){try{const r=await fetch(API_BASE+'/api'+p,{method:o.method||'GET',headers:hdr(),credentials:NATIVE?'omit':'same-origin',body:o.body!==undefined?JSON.stringify(o.body):undefined});let j=null;try{j=await r.json()}catch(e){}return{ok:r.ok,status:r.status,j:j||{}}}catch(e){return{ok:false,status:0,j:{error:'network'}}}}
+const fresh=()=>JSON.parse(JSON.stringify(D0));
+function pushState(){if(!ME)return;clearTimeout(SYT);SYT=setTimeout(async()=>{const r=await API('/state',{method:'PUT',body:{state:S,updatedAt:S.u}});if(r.status===409&&r.j.state){S=Object.assign(fresh(),r.j.state);S.u=r.j.updatedAt;S.user={name:ME.name,email:ME.email};if(S.screen==='session')S.screen='home';try{localStorage.setItem(LSK(),JSON.stringify(S))}catch(e){}render()}SYNC=r.ok||r.status===409?'cloud':'local'},1500)}
+async function pullState(){let loc=null;try{loc=JSON.parse(localStorage.getItem(LSK())||'null')}catch(e){}
+const r=await API('/state'),srv=r.ok&&r.j.state?r.j.state:null,st=r.ok?r.j.updatedAt:0;
+if(srv&&(!loc||st>=(loc.u||0)))S=Object.assign(fresh(),srv);else if(loc)S=Object.assign(fresh(),loc);else S=fresh();
+if(S.screen==='session')S.screen='home';SYNC=r.ok?'cloud':'local';S.user={name:ME.name,email:ME.email};
+if(loc&&(!srv||(loc.u||0)>st))pushState()}
+async function afterAuth(j){ME=j.user;ENT=j.entitlement;if(j.token)localStorage.setItem('tendra_token',j.token);try{localStorage.setItem('tendra_me',JSON.stringify(ME));localStorage.setItem('tendra_ent',JSON.stringify(ENT))}catch(e){}await pullState();syncPrefs();nativeInit()}
+async function refreshEnt(){const r=await API('/me');if(r.ok){ENT=r.j.entitlement;try{localStorage.setItem('tendra_ent',JSON.stringify(ENT))}catch(e){}}return r.ok}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function boot(){const q=new URLSearchParams(location.search);
+if(!NATIVE&&'serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
+try{const r=await fetch(API_BASE+'/media/index.json');if(r.ok)MEDIA=await r.json()}catch(e){}
+if(q.get('reset')){F.rtoken=q.get('reset');S.screen='reset';history.replaceState(null,'',location.pathname);render();return}
+const r=await API('/me');
+if(r.ok){ME=r.j.user;ENT=r.j.entitlement;try{localStorage.setItem('tendra_me',JSON.stringify(ME));localStorage.setItem('tendra_ent',JSON.stringify(ENT))}catch(e){}await pullState();nativeInit();if(!S.profile)S.screen='safety';else if(['welcome','signup','login','safety','stop'].includes(S.screen))S.screen='home';syncPrefs()}
+else if(r.status===0){try{const m=JSON.parse(localStorage.getItem('tendra_me')||'null');if(m){ME=m;ENT=JSON.parse(localStorage.getItem('tendra_ent')||'null');const loc=JSON.parse(localStorage.getItem(LSK())||'null');if(loc){S=Object.assign(fresh(),loc);S.user={name:ME.name,email:ME.email}}}}catch(e){}}
+if(q.get('checkout')==='success'){history.replaceState(null,'',location.pathname);for(let i=0;i<6;i++){await refreshEnt();if(ENT&&['active','pass'].includes(ENT.status))break;await sleep(1500)}F.msg='Merci ! Ton accès est activé.';if(S.profile)S.screen='home'}
+render();schedRem()}
+const doneToday=()=>S.logs.some(x=>x.date===tdy());
+const remDue=()=>{if(!S.rem||!S.rem.on)return null;const[h,m]=S.rem.t.split(':').map(Number),d=new Date();d.setHours(h,m,0,0);return{late:Date.now()>=d.getTime(),t:S.rem.t}};
+let RMT=null;function schedRem(){clearTimeout(RMT);if(!S.rem||!S.rem.on||doneToday())return;const[h,m]=S.rem.t.split(':').map(Number),d=new Date();d.setHours(h,m,0,0);const ms=d.getTime()-Date.now();if(ms<0)return;RMT=setTimeout(()=>{try{if(window.Notification&&Notification.permission==='granted')new Notification('Tendra',{body:'C’est l’heure de ta séance.'})}catch(e){}render()},ms)}
+function syncPrefs(){if(!ME)return;API('/prefs',{method:'PUT',body:{remindOn:!!(S.rem&&S.rem.on),remindTime:(S.rem&&S.rem.t)||'18:00',tz:(Intl.DateTimeFormat().resolvedOptions().timeZone)||'Europe/Paris'}})}
+const b64u=s=>{const p='='.repeat((4-s.length%4)%4),r=atob((s+p).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from([...r].map(c=>c.charCodeAt(0)))};
+async function enablePush(){try{if(NATIVE)return nativeRem();if(!('serviceWorker' in navigator)||!('PushManager' in window)||!window.Notification)return false;if(Notification.permission==='default')await Notification.requestPermission();if(Notification.permission!=='granted')return false;const k=await API('/push/key');if(!k.ok||!k.j.key)return false;const reg=await navigator.serviceWorker.ready,sub=(await reg.pushManager.getSubscription())||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(k.j.key)});await API('/push/subscribe',{method:'POST',body:sub.toJSON()});return true}catch(e){return false}}
+async function nativeRem(){const LN=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications;if(!LN)return false;try{await LN.requestPermissions();await LN.cancel({notifications:[{id:1}]});if(S.rem&&S.rem.on){const[h,m]=S.rem.t.split(':').map(Number);await LN.schedule({notifications:[{id:1,title:'Tendra',body:'C’est l’heure de ta séance.',schedule:{on:{hour:h,minute:m},allowWhileIdle:true}}]})}return true}catch(e){return false}}
+function setRem(on){S.rem=S.rem||{on:false,t:'18:00'};S.rem.on=on;save();syncPrefs();if(on)enablePush();else if(NATIVE)nativeRem();schedRem();render()}
+function setRemT(v){S.rem=S.rem||{on:true,t:'18:00'};if(v)S.rem.t=v;save();syncPrefs();if(NATIVE)nativeRem();schedRem();render()}
+const tdy=()=>new Date().toISOString().slice(0,10);
+const streak=()=>{const ds=[...new Set(S.logs.filter(x=>x.date).map(x=>x.date))].sort();if(!ds.length)return 0;let n=0;const d=new Date(tdy());if(ds[ds.length-1]!==tdy()){d.setDate(d.getDate()-1);if(ds[ds.length-1]!==d.toISOString().slice(0,10))return 0}
+while(ds.includes(d.toISOString().slice(0,10))){n++;d.setDate(d.getDate()-1)}return n};
+const mx_=n=>(S.maxes||(S.maxes={}))[n];
+const kgs=x=>{const m=mx_(x.name);if(!(m>0)||!x.pct)return '';const a=Math.round(m*x.pct[0]/100*2)/2,b=Math.round(m*x.pct[1]/100*2)/2;return a===b?`${a} kg`:`${a} à ${b} kg`};
+const loadTxt=x=>kgs(x)?` · Charge : ${kgs(x)}`:'';
+const loadBox=(x,g)=>g.ph==='ready'&&x.pct&&mx_(x.name)==null?`<div class="card"><b>Charge de départ</b><p class="mu" style="font-size:13px">Indique la charge avec laquelle tu fais 10 répétitions propres. Tendra calcule ensuite les kilos de chaque série.</p><input id="w10" type="number" inputmode="decimal" placeholder="kg pour 10 répétitions"><button class="btn" onclick="saveMax()">Calculer mes charges</button><button class="btn g" onclick="skipMax()">Sans charge pour cet exercice</button></div>`:'';
+function saveMax(){const v=parseFloat(($('#w10')||{}).value);if(!(v>0))return;S.maxes[G.it[G.i].name]=Math.round(v*1.33*2)/2;save();render()}
+function skipMax(){S.maxes[G.it[G.i].name]=0;save();render()}
+const PLANS=[['yearly','Annuel','49,99 €','par an · soit 4,17 € par mois','Meilleur choix · −48 %'],['monthly','Mensuel','7,99 €','par mois · résiliable à tout moment',''],['pass','Pass 6 semaines','19,99 €','paiement unique · sans abonnement','']];
+const access=()=>!!ENT&&Date.now()<ENT.accessUntil;
+const tLeft=()=>ENT?Math.max(0,Math.ceil((ENT.trialEnd-Date.now())/864e5)):0;
+const planName=p=>({yearly:'Annuel',monthly:'Mensuel',pass:'Pass 6 semaines',store:'Abonnement via le store'})[p]||'offre';
+const fdate=ms=>new Date(ms).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+const statusText=()=>{if(!ENT)return'Statut indisponible hors ligne.';const n=tLeft();switch(ENT.status){case'active':return`Abonné · ${planName(ENT.plan)} · prochain renouvellement le ${fdate(ENT.periodEnd)}`;case'canceled':return`Abonnement résilié · accès jusqu’au ${fdate(ENT.periodEnd)}`;case'pass':return`Pass 6 semaines · accès jusqu’au ${fdate(ENT.passUntil)}`;case'trial':return`Essai gratuit : ${n} jour${n>1?'s':''} restant${n>1?'s':''}`;default:return'Essai gratuit terminé.'}};
+V.paywall=()=>{const sel=F.plan||'yearly',st=ENT?ENT.status:'expired',head=['active','pass'].includes(st)?'Ton accès est actif.':st==='trial'?statusText():'Ton essai gratuit est terminé.';return `<h1>Tendra complet</h1><p class="mu">${head}</p>
+${PLANS.map(([k,nm,pz,sb,tag])=>`<button class="card" style="display:block;width:100%;text-align:left;cursor:pointer;color:var(--ink);font-family:inherit;${sel===k?'border:2px solid var(--pr)':''}" onclick="pick('plan','${k}')">${tag?`<div style="font-size:12px;font-weight:800;color:var(--pr)">${tag}</div>`:''}<div class="row" style="margin:0"><b style="font-size:18px">${nm}</b><b style="font-size:18px">${pz}</b></div><div class="mu" style="font-size:13px">${sb}</div></button>`).join('')}
+<div class="card"><b>Inclus</b><p class="mu" style="margin:6px 0 0">Programme adapté à ton tendon, ton objectif et ton sport<br>Check-in quotidien qui ajuste la séance<br>Séances guidées : démonstration 3D, chrono, repos, voix<br>Charges calculées en kilos et ajustées<br>Suivi, bilan hebdomadaire et série de jours</p></div>
+<p class="err">${esc(F.err)}</p><button class="btn" onclick="checkout()">${F.busy?'Redirection…':'Continuer'}</button>${access()?`<button class="btn g" onclick="go('home')">Retour</button>`:''}
+<p class="mu" style="font-size:12px">${NATIVE?'Paiement via ton compte App Store ou Google Play.':'Paiement sécurisé par Stripe.'} L’abonnement se renouvelle automatiquement jusqu’à résiliation, possible à tout moment depuis ton profil. Le pass 6 semaines est un paiement unique.</p>`};
+async function checkout(){if(F.busy)return;if(NATIVE)return nativePurchase();F.busy=true;render();const r=await API('/billing/checkout',{method:'POST',body:{plan:F.plan||'yearly'}});F.busy=false;if(r.ok&&r.j.url){location.href=r.j.url;return}fail(r.status===503?`Le paiement n’est pas encore activé sur ce serveur.`:`Impossible d’ouvrir le paiement. Réessaie dans un instant.`)}
+async function nativeInit(){const P=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Purchases;if(!NATIVE||!P||!window.TENDRA_RC_KEY||!ME)return;try{await P.configure({apiKey:window.TENDRA_RC_KEY,appUserID:ME.id})}catch(e){}}
+async function nativePurchase(){const P=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Purchases;if(!P)return fail(`Achat intégré non configuré (voir docs/STORES.md).`);try{const o=await P.getOfferings(),pk=((o.current&&o.current.availablePackages)||[]),want=({yearly:'$rc_annual',monthly:'$rc_monthly'})[F.plan||'yearly'],a=pk.find(x=>x.identifier===want)||pk[0];await P.purchasePackage({aPackage:a});for(let i=0;i<6;i++){await refreshEnt();if(ENT&&ENT.status==='active')break;await sleep(1500)}go('home')}catch(e){fail(`Achat annulé ou impossible.`)}}
+async function portal(){const r=await API('/billing/portal',{method:'POST',body:{}});if(r.ok&&r.j.url)location.href=r.j.url;else fail(`Impossible d’ouvrir la gestion de l’abonnement.`)}
+function cyc(up){if(up)Object.keys(S.maxes||{}).forEach(k=>{if(S.maxes[k]>0)S.maxes[k]=Math.round(S.maxes[k]*1.05*2)/2});(S.cyc=S.cyc||{})[S.day]=1;save();render()}
+function startSession(){unlock();const d=S.day;const it=adapt(items(d),lvOf(d)).map(x=>{const ty=x[2].includes(' · ')?x[2].split(' · ')[0]:'Mobilité',pa=parse(x[1]),pt=patOf(x[0]);return{name:x[0],det:x[1],cue:x[2],ty,pat:pt,...pa,pr:propsOf(x[0]),pct:(m=>m?[+m[1],+(m[2]||m[1])]:null)(x[1].match(/(\d+)(?: à (\d+))? % de ta charge max/)),rest:/charge max|100 %/.test(x[1])?150:(RT[ty]||60),tp:pa.mode==='dist'?(pt==='run'?[.4,0,.4]:TPO[ty]||[2,1,2]):TPO[ty]||[2,1,2],loop:ty==='Mobilité'}});
+G={on:true,it,i:0,s:1,ph:'ready',el:0,reps:0,rd:0,pause:false,total:0,tok:Date.now(),last:performance.now()};
+S.screen='session';render();window.scrollTo(0,0);const k=G.tok;requestAnimationFrame(t=>loop(k))}
+const AU={m:0,ctx:null,get on(){return this.m!==2}};
+function say(t){if(AU.m!==1||!window.speechSynthesis)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='fr-FR';u.rate=1.05;speechSynthesis.speak(u)}catch(e){}}
+function unlock(){try{if(!AU.ctx)AU.ctx=new(window.AudioContext||window.webkitAudioContext)();if(AU.ctx.state==='suspended')AU.ctx.resume()}catch(e){}}
+function beep(f,d,v){if(!AU.on)return;try{unlock();const c=AU.ctx,o=c.createOscillator(),g=c.createGain(),t0=c.currentTime;o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0.0001,t0);g.gain.linearRampToValueAtTime(v||.25,t0+.012);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+d+.03)}catch(e){}}
+function tick(g,x){const sec=Math.floor(g.el/1000);if(sec===g.ls)return;g.ls=sec;
+const cd=r=>{if(AU.m===1){if(r<=3&&r>0)say(String(r));else if(r===10)say('Dix secondes')}else if(AU.m===0){if(r<=3&&r>0)beep(880,.12,.3);else if(r>3)beep(520,.04,.1)}};
+if(g.ph==='rest')cd(Math.ceil((g.rd-g.el)/1000));
+else if(x.mode==='hold'){const r=Math.ceil(x.n-g.el/1000);cd(r);if(AU.m===1&&x.n>=30&&r===Math.round(x.n/2))say('À mi-parcours')}
+else if(x.mode==='dist'&&sec>0&&AU.m===0)beep(520,.04,.1)}
+function startWork(){unlock();G.ph='work';G.el=0;G.reps=0;beep(1000,.2,.35);const x=G.it[G.i];say(`${x.name}. Série ${G.s} sur ${x.sets}. Go`);render()}
+function skipRest(){G.ph='work';G.el=0;G.reps=0;beep(1100,.2,.3);render()}
+function endSet(){const g=G,x=g.it[g.i];beep(1320,.35,.35);
+if(g.s<x.sets){g.s++;g.ph='rest';g.el=0;g.rd=x.rest*1000;say(`Repos. ${Math.round(x.rest)} secondes`)}
+else{S.done[S.day]=S.done[S.day]||[];S.done[S.day][g.i]=true;save();if(g.i>=g.it.length-1)return endSession();g.i++;g.s=1;g.ph='rest';g.el=0;g.rd=Math.max(30,x.rest/2)*1000;say(`Bien joué. Ensuite : ${g.it[g.i].name}`)}
+render()}
+function endSession(){beep(1320,.5,.4);say('Séance terminée. Bravo.');const l=S.logs.find(x=>x.d==S.day),sec=Math.round(G.total/1000);if(l){l.dur=sec;l.date=tdy()}F.dur=fmt(sec);G.on=false;F.rate=true;S.screen='home';save();render();window.scrollTo(0,0)}
+function stopSession(){G.on=false;S.screen='home';render()}
+function step(dt){const g=G;if(!g.on||g.pause)return;g.total+=dt;if(g.ph==='ready')return;g.el+=dt;const x=g.it[g.i],key=g.ph+g.i+'-'+g.s;if(g.lk!==key){g.lk=key;g.ls=-1;g.pr=0}tick(g,x);
+if(g.ph==='rest'){if(g.el>=g.rd){g.ph='work';g.el=0;g.reps=0;beep(1100,.25,.35);say(`Série ${g.s} sur ${x.sets}. Go`);render()}return}
+if(x.mode==='hold'&&g.el>=x.n*1000)return endSet();
+if(x.mode==='reps'){const L=x.tp[0]+x.tp[1]+x.tp[2];g.reps=Math.min(x.n,Math.floor(g.el/1000/L));if(g.reps>g.pr){g.pr=g.reps;if(AU.m===1)say(String(g.reps));else beep(700,.06,.22)}if(g.reps>=x.n)return endSet()}}
+const K=.8;
+function fk(P){const[c,a1,b1,a2,b2,d,e,h,p]=P,R=rad,sn=Math.sin,co=Math.cos;
+const sh=[sn(R(c))*60*K,-co(R(c))*60*K],hd=[sh[0]+sn(R(c))*17*K,sh[1]-co(R(c))*17*K],el=[sh[0]+sn(R(d))*34*K,sh[1]+co(R(d))*34*K],wr=[el[0]+sn(R(e))*32*K,el[1]+co(R(e))*32*K],hn=[wr[0]+sn(R(h))*10*K,wr[1]+co(R(h))*10*K];
+const lg=(a,b)=>{const k=[sn(R(a))*52*K,co(R(a))*52*K],n=[k[0]+sn(R(b))*50*K,k[1]+co(R(b))*50*K];return[k,n,[n[0]+co(R(p))*14*K,n[1]+sn(R(p))*14*K]]};
+return{o:[0,0],sh,hd,el,wr,hn,l1:lg(a1,b1),l2:lg(a2,b2)}}
+function pose(g){const x=g.it[g.i];let t=0,cue='';if(g.ph==='work'){const e=g.el/1000;
+if(x.mode==='hold'&&!x.loop){t=ease(Math.min(1,e/1.5));cue='Tiens'}else{const[d,h,u]=x.tp,L=d+h+u,y=e%L;if(y<d){t=ease(y/d);cue='Effort'}else if(y<d+h){t=1;cue='Tiens'}else{t=ease(1-(y-d-h)/u);cue='Retour'}}
+if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)t=1}
+return[t,cue]}
+const LGT=[-.55,-.83];
+const gloss=(gd,s)=>{const cl=v=>Math.max(0,Math.min(1,v));[[0,'#05060a'],[s-.26,'#161920'],[s-.1,'#3a4254'],[s-.025,'#8896b2'],[s,'#c3cfe6'],[s+.03,'#7c89a5'],[s+.14,'#2a303d'],[s+.34,'#10131a'],[1,'#07080c']].map(([p,k])=>[cl(p),k]).sort((u,v)=>u[0]-v[0]).forEach(([p,k])=>gd.addColorStop(p,k))};
+const rf=(pf,u)=>{let i=0;while(i<pf.length-2&&u>pf[i+1][0])i++;const p1=pf[i],p2=pf[i+1];return p1[1]+(p2[1]-p1[1])*(u-p1[0])/(p2[0]-p1[0])};
+const PF={th:[[0,10.2],[.25,9.6],[.55,8.6],[.85,6.9],[1,6]],sn:[[0,6.1],[.25,7],[.5,5.8],[.8,4.4],[1,3.7]],ft:[[0,4],[.5,4.3],[1,2.8]],ua:[[0,5.9],[.35,5.7],[.7,4.6],[1,4]],fa:[[0,4.3],[.3,4.5],[.7,3.2],[1,2.7]],hd:[[0,2.8],[.5,3.1],[1,2.2]],nk:[[0,4.6],[.5,4.2],[1,4.4]],dl:[[0,7.4],[1,6.4]]};
+const TPF=[[0,14,9.3],[.15,12.8,8.8],[.3,12,8.4],[.45,12.4,8.7],[.6,14.5,9.6],[.75,17,10.4],[.9,17.8,10],[1,15.5,8.6]];
+function draw(){const g=G,x=g.it[g.i],cv=VW.cv,[A,B,an,gm]=PAT[x.pat],[t,cue]=pose(g),P=A.map((v,i)=>v+(B[i]-v)*t),f=fk(P);
+const ancX=ff=>{const pp=[ff.o,ff.sh,ff.el,ff.wr,ff.hn,...ff.l1,...ff.l2],xx=pp.map(q=>q[0]);return an==='h'?0:an==='f'?ff.l1[1][0]:an==='c'?(Math.min(...xx)+Math.max(...xx))/2:(ff.l1[1][0]+ff.l2[1][0])/2};
+const pts=[f.o,f.sh,f.el,f.wr,f.hn,...f.l1,...f.l2],my=gm==='toe'?Math.max(f.l1[2][1],f.l2[2][1]):Math.max(...pts.map(q=>q[1]),f.hd[1]+11*K),ax=ancX(f),dy=190-my-P[9];
+if(!cv)return cue;const now=performance.now();if(now-VW.t0>3500)VW.taz=VW.base+.3*Math.sin((now-VW.t0)/2400);VW.az+=(VW.taz-VW.az)*.12;
+const a=VW.az,ca=Math.cos(a),sa=Math.sin(a),cE=Math.cos(VW.el),sE=Math.sin(VW.el),c=cv.getContext('2d');
+c.setTransform(2,0,0,2,0,0);c.clearRect(0,0,320,220);c.lineCap='round';c.lineJoin='round';
+const W3=(q,z)=>[q[0]-ax,190-(q[1]+dy),z],PR=p=>{const d=p[0]*sa+p[2]*ca;return[160+p[0]*ca-p[2]*sa,190-p[1]*cE+d*sE,d]},Q=[],L3=(p,q,u)=>[p[0]+(q[0]-p[0])*u,p[1]+(q[1]-p[1])*u,p[2]+(q[2]-p[2])*u];
+const shd=(col,k)=>`rgb(${col.map(v=>Math.round(v*k)).join(',')})`;
+const boxP=(x0,x1,y0,y1,z0,z1,col,al)=>{Q.push({d:PR([(x0+x1)/2,(y0+y1)/2,(z0+z1)/2])[2]-40,f:()=>{c.globalAlpha=al||1;
+[[0,-1],[0,1],[1,-1],[1,1]].forEach(([ax_,sg])=>{if((ax_?sg*ca:sg*sa)<=.02)return;const xx=sg<0?x0:x1,zz=sg<0?z0:z1,q=ax_?[[x0,y0,zz],[x0,y1,zz],[x1,y1,zz],[x1,y0,zz]]:[[xx,y0,z0],[xx,y1,z0],[xx,y1,z1],[xx,y0,z1]];c.fillStyle=shd(col,ax_?.82:1);c.beginPath();q.forEach((p,i)=>{const s=PR(p);i?c.lineTo(s[0],s[1]):c.moveTo(s[0],s[1])});c.closePath();c.fill()});
+if(sE>.02){c.fillStyle=shd(col,1.12);c.beginPath();[[x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1]].forEach((p,i)=>{const s=PR(p);i?c.lineTo(s[0],s[1]):c.moveTo(s[0],s[1])});c.closePath();c.fill()}c.globalAlpha=1}})};
+const rod=(p,q,w,col)=>{const u=PR(p),v=PR(q);Q.push({d:(u[2]+v[2])/2,f:()=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();c.moveTo(u[0],u[1]);c.lineTo(v[0],v[1]);c.stroke()}})};
+const dsc=(p,R,col)=>{const u=PR(p);Q.push({d:u[2],f:()=>{c.fillStyle=col;c.beginPath();c.ellipse(u[0],u[1],Math.max(1.5,R*Math.abs(ca)),R*Math.max(.55,cE),0,0,7);c.fill();c.strokeStyle='rgba(255,255,255,.2)';c.lineWidth=1;c.stroke()}})};
+const fB=fk(B),wxB=q=>q[0]-ancX(fB),hL=W3(f.hn,17),hR=W3(f.hn,-17);
+
+Q.push({d:-1e5,f:()=>{c.strokeStyle='rgba(120,135,165,.28)';c.lineWidth=1;c.beginPath();for(let k=-5;k<=5;k++){const a1=PR([k*30,0,-150]),a2=PR([k*30,0,150]),b1=PR([-150,0,k*30]),b2=PR([150,0,k*30]);c.moveTo(a1[0],a1[1]);c.lineTo(a2[0],a2[1]);c.moveTo(b1[0],b1[1]);c.lineTo(b2[0],b2[1])}c.stroke()}});
+const s0=PR([0,0,0]);
+Q.push({d:-9.9e4,f:()=>{c.save();c.translate(s0[0],s0[1]);c.scale(1,.36);const gr=c.createRadialGradient(0,0,2,0,0,100);gr.addColorStop(0,'rgba(255,255,255,.8)');gr.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=gr;c.beginPath();c.arc(0,0,100,0,7);c.fill();c.restore()}});
+const fe=[[f.l1[1],f.l1[2],8.5],[f.l2[1],f.l2[2],-8.5]];
+Q.push({d:-9e4,f:()=>{c.fillStyle='rgba(0,0,0,.16)';c.beginPath();c.ellipse(s0[0],s0[1],Math.max(26,60-P[9]),7,0,0,7);c.fill();fe.forEach(([an_,to_,z])=>{const a1=W3(an_,z),t1=W3(to_,z);if(a1[1]<4||t1[1]<4){const sp=PR([(a1[0]+t1[0])/2,0,z]);c.fillStyle='rgba(0,0,0,.26)';c.beginPath();c.ellipse(sp[0],sp[1],13,4.2,0,0,7);c.fill()}})}});
+const limb=(p0,p1,prof)=>{const a0=PR(p0),b0=PR(p1);Q.push({d:(a0[2]+b0[2])/2,fg:1,f:()=>{const ex=b0[0]-a0[0],ey=b0[1]-a0[1],d=Math.hypot(ex,ey)||1,nx=-ey/d,ny=ex/d,N=10,Lp=[],Rp=[];let rm=0;for(let j=0;j<=N;j++){const u=j/N,r=rf(prof,u);rm=Math.max(rm,r);const cx=a0[0]+ex*u,cy=a0[1]+ey*u;Lp.push([cx+nx*r,cy+ny*r]);Rp.push([cx-nx*r,cy-ny*r])}
+const mx=(a0[0]+b0[0])/2,mY=(a0[1]+b0[1])/2,gd=c.createLinearGradient(mx+nx*rm,mY+ny*rm,mx-nx*rm,mY-ny*rm);gloss(gd,.5-.4*(nx*LGT[0]+ny*LGT[1]));c.fillStyle=gd;c.beginPath();Lp.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));Rp.reverse().forEach(p=>c.lineTo(p[0],p[1]));c.closePath();c.fill();
+c.beginPath();c.arc(a0[0],a0[1],prof[0][1],0,7);c.fill();c.beginPath();c.arc(b0[0],b0[1],prof[prof.length-1][1],0,7);c.fill()}})};
+const ring=(p,r)=>{const u=PR(p);Q.push({d:u[2]+1,fg:1,f:()=>{c.strokeStyle='rgba(190,200,225,.16)';c.lineWidth=.8;c.beginPath();c.arc(u[0],u[1],r,0,7);c.stroke()}})};
+const mus=(p0,p1,u,off,rx,ry,al,zz)=>{const dx_=p1[0]-p0[0],dy_=p1[1]-p0[1],l=Math.hypot(dx_,dy_)||1,fr=[-dy_/l,dx_/l],vis=off>0?fr[0]*sa:-fr[0]*sa;if(vis<.1)return;const S3=PR([p0[0]+dx_*u+fr[0]*off,p0[1]+dy_*u+fr[1]*off,zz]),a0=PR(p0),b0=PR(p1),an_=Math.atan2(b0[1]-a0[1],b0[0]-a0[0]);Q.push({d:S3[2]+3,fg:1,f:()=>{c.fillStyle=`rgba(150,162,190,${al*Math.min(1,vis*1.4)})`;c.beginPath();c.ellipse(S3[0],S3[1],rx,ry*(.4+.6*Math.abs(ca)),an_,0,7);c.fill()}})};
+[[f.l1,8.5],[f.l2,-8.5]].forEach(([l,z])=>{const h=W3(f.o,z),k=W3(l[0],z),n=W3(l[1],z),t2=W3(l[2],z);limb(h,k,PF.th);limb(k,n,PF.sn);limb(n,t2,PF.ft);ring(k,6.4);ring(n,4.3);
+mus(h,k,.55,6.5,7.5,4.2,.3,z);mus(h,k,.82,5,4,3.2,.28,z);mus(h,k,.5,-6,8,3.8,.26,z);mus(k,n,.28,-4.5,6.5,3.6,.28,z);mus(k,n,.4,4,6,2,.18,z)});
+const hc=W3(f.o,0),sh=W3(f.sh,0),hv=W3(f.hd,0),Hs=PR(hc),Ss=PR(sh),ax2=Ss[0]-Hs[0],ay2=Ss[1]-Hs[1],al2=Math.hypot(ax2,ay2)||1,tnx=-ay2/al2,tny=ax2/al2;
+const pf=u=>{let i=0;while(i<TPF.length-2&&u>TPF[i+1][0])i++;const p1=TPF[i],p2=TPF[i+1],k=(u-p1[0])/(p2[0]-p1[0]);return[p1[1]+(p2[1]-p1[1])*k,p1[2]+(p2[2]-p1[2])*k]};
+Q.push({d:(Hs[2]+Ss[2])/2,fg:1,f:()=>{const l1=[],r1=[];for(let j=0;j<=14;j++){const u=j/14,[hw,dp]=pf(u),w=Math.hypot(dp*ca,hw*sa),cx=Hs[0]+ax2*u,cy=Hs[1]+ay2*u;l1.push([cx+tnx*w,cy+tny*w]);r1.push([cx-tnx*w,cy-tny*w])}
+const mx=(Hs[0]+Ss[0])/2,mY=(Hs[1]+Ss[1])/2,rr=Math.hypot(15*sa,10*ca)+4,gd=c.createLinearGradient(mx+tnx*rr,mY+tny*rr,mx-tnx*rr,mY-tny*rr);gloss(gd,.5-.4*(tnx*LGT[0]+tny*LGT[1]));c.fillStyle=gd;c.beginPath();l1.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));r1.reverse().forEach(p=>c.lineTo(p[0],p[1]));c.closePath();c.fill()}});
+const pw=Math.hypot(10*ca,15*sa);limb(hc,L3(hc,sh,.12),[[0,pw],[1,pw]]);
+const ax3=[sh[0]-hc[0],sh[1]-hc[1]],ln3=Math.hypot(ax3[0],ax3[1])||1,fr3=[ax3[1]/ln3,-ax3[0]/ln3],nv=fr3[0]*sa,ang=Math.atan2(ay2,ax2);
+const hi=(u,off,z,rx,ry,al)=>{const vis=off>0?nv:-nv;if(vis<.12)return;const S3=PR([hc[0]+ax3[0]*u+fr3[0]*off,hc[1]+ax3[1]*u+fr3[1]*off,z]);Q.push({d:S3[2]+3,fg:1,f:()=>{c.fillStyle=`rgba(150,162,190,${al*Math.min(1,vis*1.4)})`;c.beginPath();c.ellipse(S3[0],S3[1],rx,ry*(.35+.65*Math.abs(sa)),ang,0,7);c.fill()}})};
+[8,-8].forEach(z=>hi(.8,9,z,9,6,.3));[.52,.42,.32,.22].forEach(u=>[3.5,-3.5].forEach(z=>hi(u,9.2,z,3.4,3.2,.26)));
+[.66,.58,.5].forEach(u=>[12.5,-12.5].forEach(z=>hi(u,7.5,z,3,2.4,.2)));[11,-11].forEach(z=>hi(.34,8,z,4,6,.2));
+[7,-7].forEach(z=>hi(.95,-8.5,z,7,5,.25));[11,-11].forEach(z=>hi(.6,-9,z,8,9,.25));[3,-3].forEach(z=>hi(.5,-9.2,z,10,2.2,.2));[6.5,-6.5].forEach(z=>hi(.02,-10,z,8,8,.28));
+limb(sh,L3(sh,hv,.85),PF.nk);
+[17,-17].forEach(z=>{const s2=W3(f.sh,z),e2=W3(f.el,z),w2=W3(f.wr,z),h2=W3(f.hn,z);limb(s2,e2,PF.ua);limb(e2,w2,PF.fa);limb(w2,h2,PF.hd);limb(s2,L3(s2,e2,.22),PF.dl);ring(e2,4.6);ring(w2,3.2);
+const dd=[h2[0]-w2[0],h2[1]-w2[1]],dl=Math.hypot(dd[0],dd[1])||1,ux=dd[0]/dl,uy=dd[1]/dl;[-2.4,-.8,.8,2.4].forEach(o=>rod([h2[0],h2[1],h2[2]],[h2[0]+ux*5.5,h2[1]+uy*5.5,h2[2]+o],1.7,'#2a303d'));
+mus(s2,e2,.42,4.2,5.2,3,.3,z);mus(s2,e2,.45,-4.2,5.5,3.2,.26,z);mus(e2,w2,.25,3.5,4.2,2.4,.22,z)});
+const Hd=PR(hv),rho=P[0]*.4*Math.PI/180,cr=Math.cos(rho),sr=Math.sin(rho),loc=(x_,y_,z_)=>{const xr=x_*cr+y_*sr,yr=-x_*sr+y_*cr,p=PR([hv[0]+xr,hv[1]+yr,z_]);return[p[0],p[1],xr*sa+z_*ca]};
+Q.push({d:Hd[2]+1,fg:1,f:()=>{const rg=c.createRadialGradient(Hd[0]-3,Hd[1]-4,2,Hd[0],Hd[1],12);rg.addColorStop(0,'#8a96b0');rg.addColorStop(.35,'#2a303d');rg.addColorStop(.7,'#12151c');rg.addColorStop(1,'#07080b');c.fillStyle=rg;
+c.beginPath();c.ellipse(Hd[0],Hd[1],Math.hypot(8.4*ca,7.6*sa),9.6,-rho,0,7);c.fill();const jw=loc(3,-5,0);c.beginPath();c.ellipse(jw[0],jw[1],Math.hypot(6.2*ca,5.8*sa),5,-rho,0,7);c.fill();
+for(const z of[7.8,-7.8]){const e=loc(-.5,-.5,z);if(e[2]>.5){c.fillStyle='#14171d';c.beginPath();c.ellipse(e[0],e[1],1.5,2.7,-rho,0,7);c.fill()}}
+c.strokeStyle='rgba(200,210,230,.45)';c.lineWidth=1;
+for(const z of[3.2,-3.2]){const e=loc(6.8,1.6,z);if(e[2]>.8){c.fillStyle='rgba(0,0,0,.75)';c.beginPath();c.ellipse(e[0],e[1],1.9,1.2,-rho,0,7);c.fill();const b1=loc(7.2,3.8,z*.4),b2=loc(7.2,4,z*1.6);c.beginPath();c.moveTo(b1[0],b1[1]);c.lineTo(b2[0],b2[1]);c.stroke()}}
+const nt=loc(9.4,-2,0),nb=loc(8,2,0);if(nt[2]>-1.5){c.beginPath();c.moveTo(nb[0],nb[1]);c.lineTo(nt[0],nt[1]);c.stroke();c.fillStyle='#1c1f27';c.beginPath();c.arc(nt[0],nt[1],1.9,0,7);c.fill()}
+const m1=loc(8,-6,-3),m2=loc(8,-6,3);if(m1[2]>.8){c.strokeStyle='rgba(0,0,0,.8)';c.lineWidth=1.2;c.beginPath();c.moveTo(m1[0],m1[1]);c.lineTo(m2[0],m2[1]);c.stroke()}}});
+(x.pr||[]).forEach(k=>{
+if(k==='wall:back'){const w=hc[0]-12;boxP(w-5,w,0,175,-85,85,[214,220,232],sa<-.15?.2:.96)}
+else if(k==='wall:front'){const w=wxB(fB.l1[0])+9;boxP(w,w+5,0,175,-85,85,[214,220,232],sa>.15?.2:.96)}
+else if(k==='wall:hands'){const w=wxB(fB.hn)+7;boxP(w,w+5,0,175,-85,85,[214,220,232],sa>.15?.2:.96)}
+else if(k==='box:toe'){const n=W3(f.l1[1],0);boxP(n[0]+5,n[0]+62,0,24,-26,26,[150,160,182])}
+else if(k==='box:foot'){const n=W3(f.l1[1],0);boxP(n[0]-22,n[0]+36,0,32,-26,26,[150,160,182])}
+else if(k==='bench:rear'){const n=W3(f.l2[1],0),tp=Math.max(10,n[1]-3);boxP(n[0]-26,n[0]+18,0,tp,-15,15,[120,128,148])}
+else if(k==='sled'){boxP(hL[0]-4,hL[0]+60,0,9,-22,22,[90,96,112]);boxP(hL[0]+14,hL[0]+42,9,22,-14,14,[60,64,78]);[16,-16].forEach(z=>rod([hL[0],9,z],[hL[0],hL[1],z],3,'#aab3c8'))}
+else if(k.startsWith('bar:')){const p=k==='bar:sh'?[sh[0]-5,sh[1]+2]:k==='bar:hip'?[hc[0]+2,hc[1]+3]:[hL[0],hL[1]];rod([p[0],p[1],-42],[p[0],p[1],42],2.6,'#aab3c8');[-38,-33,33,38].forEach(z=>dsc([p[0],p[1],z],13,'#2b303b'))}
+else if(k==='db'){[hL,hR].forEach(h=>{rod([h[0],h[1],h[2]-8],[h[0],h[1],h[2]+8],2.2,'#aab3c8');[-9,9].forEach(o=>dsc([h[0],h[1],h[2]+o],5.5,'#2b303b'))})}
+else if(k==='ball'){const p=PR([hL[0],hL[1],0]);Q.push({d:p[2]+2,f:()=>{c.fillStyle='#FF7A59';c.beginPath();c.arc(p[0],p[1],7,0,7);c.fill();c.strokeStyle='rgba(255,255,255,.35)';c.lineWidth=1;c.beginPath();c.arc(p[0]-1.5,p[1]-1.5,4,3.6,5.2);c.stroke()}})}
+else if(k==='band'&&['rot','row','lat','wrist','press'].includes(x.pat)){const hy=190-(fk(A).hn[1]+dy);rod([115,0,0],[115,150,0],3,'#6b7490');[hL,hR].forEach(h=>rod([h[0],h[1],h[2]],[115,hy,0],1.8,'#FF7A59'))}
+else if(k==='bench:seat'){const fA=fk(A),mA=Math.max(...[fA.o,fA.sh,fA.el,fA.wr,fA.hn,...fA.l1,...fA.l2].map(q=>q[1])),seatH=mA-fA.o[1];boxP(hc[0]-24,hc[0]+18,0,Math.max(10,seatH-9),-20,20,[120,128,148])}
+else if(k==='db:knee'){[[f.l1[0],8.5],[f.l2[0],-8.5]].forEach(([kn,z])=>{const q=W3(kn,z);rod([q[0]-6,q[1]+6,z-8],[q[0]-6,q[1]+6,z+8],2.2,'#aab3c8');[-9,9].forEach(o=>dsc([q[0]-6,q[1]+6,z+o],5.5,'#2b303b'))})}
+else if(k==='band:knees'){rod([-92,0,0],[-92,95,0],3,'#6b7490');[[f.l1[0],8.5],[f.l2[0],-8.5]].forEach(([kn,z])=>{const q=W3(kn,z);rod([q[0],q[1],z],[-92,q[1],0],1.8,'#FF7A59')})}
+else if(k==='hurdle'){[22,-22].forEach(z=>{rod([-6,0,z],[6,0,z],3,'#6b7490');rod([0,0,z],[0,12,z],2.5,'#6b7490')});rod([0,12,-22],[0,12,22],3,'#FF7A59')}});
+Q.sort((u,v)=>u.d-v.d);const fl=Q.filter(o=>o.d<-5e4),rs=Q.filter(o=>o.d>=-5e4);fl.forEach(o=>o.f());c.save();c.globalAlpha=.09;c.translate(0,2*s0[1]);c.scale(1,-1);rs.filter(o=>o.fg).forEach(o=>o.f());c.restore();rs.forEach(o=>o.f());return cue}
+function ui(cue){const g=G,x=g.it[g.i],$t=$('#tm'),$s=$('#sub'),$p=$('#pb'),$l=$('#lab'),$a=$('#tt');if(!$t)return;let tm='—',sb='',pb=0,lb=g.ph==='rest'?'Repos':g.ph==='ready'?'Prêt ?':cue||'Effort';
+if(g.ph==='work'){if(x.mode==='hold'){tm=Math.max(0,Math.ceil(x.n-g.el/1000));sb=`secondes à tenir`;pb=g.el/(x.n*10)}else if(x.mode==='reps'){tm=g.reps;sb=`sur ${x.n} répétitions`;pb=g.reps/x.n*100}else{tm=Math.floor(g.el/1000);sb=`secondes · ${x.n} m`}}
+else if(g.ph==='rest'){tm=Math.max(0,Math.ceil((g.rd-g.el)/1000));sb=`secondes de repos`;pb=g.el/g.rd*100}
+else sb=x.mode==='hold'?`Tiens ${x.n} s`:x.mode==='dist'?`${x.n} m`:`${x.n} répétitions`;
+$t.textContent=tm;$s.textContent=sb;$p.style.width=Math.min(100,pb)+'%';$l.textContent=g.pause?'En pause':lb;$a.textContent=fmt(g.total/1000)}
+function loop(k){if(!G.on||G.tok!==k||S.screen!=='session')return;const n=performance.now(),dt=Math.min(100,n-G.last);G.last=n;step(dt);if(G.on&&S.screen==='session'){ui(draw())}requestAnimationFrame(()=>loop(k))}
+V.session=()=>{const g=G,x=g.it[g.i];return `<p class="mu" style="margin-top:8px">Exercice ${g.i+1}/${g.it.length} · série ${g.s}/${x.sets} · temps total <span id="tt">0:00</span></p><h1 style="margin:4px 0 12px">${g.ph==='rest'?'Ensuite : ':''}${x.name}</h1>
+${F.vid&&MEDIA[x.name]?`<video src="${esc(MEDIA[x.name])}" controls playsinline loop muted autoplay style="width:100%;border-radius:16px;background:#000"></video>`:`<div id="cvbox" style="border-radius:16px;overflow:hidden;background:linear-gradient(#EEF1F6,#D9E0EC);border:1px solid var(--ln);min-height:200px"></div>`}<div class="chips" style="justify-content:center">${MEDIA[x.name]?`<button class="chip" onclick="F.vid=!F.vid;render()">${F.vid?'Mannequin':'Vidéo'}</button>`:''}<button class="chip" onclick="setView(0)">Profil</button><button class="chip" onclick="setView(1.5708)">Face</button><button class="chip" onclick="setView(-1.5708)">Dos</button><button class="chip" onclick="setView(.8)">3/4</button><button class="chip" onclick="AU.m=(AU.m+1)%3;if(AU.m===1)say('Coach vocal activé');render()">Son : ${['bips','voix','muet'][AU.m]}</button></div><p class="mu" style="font-size:12px;text-align:center;margin:0 0 8px">Glisse sur le personnage pour le faire tourner</p>
+<div class="card" style="text-align:center"><div class="mu" id="lab">Prêt ?</div><div id="tm" style="font-size:56px;font-weight:800;letter-spacing:-1px">—</div><div class="mu" id="sub"></div><div class="bar"><i id="pb" style="width:0%"></i></div></div>
+<p class="mu" style="font-size:14px">${x.det} · ${x.cue}${loadTxt(x)}</p>${loadBox(x,g)}
+${g.ph==='ready'?`<button class="btn" onclick="startWork()">Démarrer</button>`:`<button class="btn g" onclick="G.pause=!G.pause;render()">${g.pause?'Reprendre':'Pause'}</button>`}
+${g.ph==='rest'?`<button class="btn g" onclick="G.rd+=15000">+15 s de repos</button><button class="btn" onclick="skipRest()">Passer le repos</button>`:g.ph==='work'?`<button class="btn" onclick="endSet()">${x.mode==='dist'?'Série faite':'Passer cette série'}</button>`:''}
+<button class="btn g" onclick="stopSession()">Quitter la séance</button>`};
+const VW={az:.7,taz:.7,base:.7,t0:0,el:.25,cv:null};
+const GLOSS=gd=>{gd.addColorStop(0,'#07080b');gd.addColorStop(.3,'#262a34');gd.addColorStop(.44,'#5a647a');gd.addColorStop(.58,'#1f232c');gd.addColorStop(1,'#07080b')};
+function setView(a){VW.base=a;VW.taz=a;VW.t0=performance.now()}
+function mount(){const b=$('#cvbox');if(!b)return;if(!VW.cv){const cv=document.createElement('canvas');cv.width=640;cv.height=440;cv.setAttribute('role','img');cv.setAttribute('aria-label','Démonstration animée de l’exercice, glisse pour tourner');cv.style.cssText='width:100%;height:auto;display:block;touch-action:pan-y;cursor:grab';let dg=null;
+cv.addEventListener('pointerdown',e=>{dg=e.clientX;if(cv.setPointerCapture)cv.setPointerCapture(e.pointerId)});cv.addEventListener('pointermove',e=>{if(dg==null)return;VW.az-=(e.clientX-dg)*.012;dg=e.clientX;VW.taz=VW.az;VW.base=VW.az;VW.t0=performance.now()});
+const un=()=>{dg=null};cv.addEventListener('pointerup',un);cv.addEventListener('pointercancel',un);VW.cv=cv}
+b.appendChild(VW.cv)}
+const nav=()=>`<nav>${[['home','Aujourd’hui'],['progress','Progrès'],['me','Profil']].map(([k,t])=>`<button class="${S.screen==k?'on':''}" onclick="go('${k}')">${t}</button>`).join('')}</nav>`;
+function render(){if(!ME&&!['welcome','signup','login','forgot','reset'].includes(S.screen))S.screen='welcome';if(ME&&!S.profile&&!['safety','stop','profile'].includes(S.screen))S.screen='safety';if(S.profile&&!T[S.profile.tendon]){S.profile=null;S.day=0;S.logs=[];S.done={};if(S.user)S.screen='profile'}if(S.screen==='session'&&!G.on)S.screen='home';if(S.screen==='home'&&S.user&&S.profile&&!F.rate&&!access())S.screen='paywall';if(['home','progress','me'].includes(S.screen)&&!(S.user&&S.profile))S.screen='welcome';$('#app').innerHTML=V[S.screen]()+(['home','progress','me'].includes(S.screen)?nav():'');if(S.screen==='session')mount()}
+boot();
+</script></body></html>

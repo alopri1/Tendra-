@@ -1,0 +1,7 @@
+{
+  "appId": "fr.tendra.app",
+  "appName": "Tendra",
+  "webDir": "../public",
+  "server": { "androidScheme": "https" },
+  "ios": { "contentInset": "always" }
+}

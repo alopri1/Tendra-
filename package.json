@@ -1,0 +1,22 @@
+{
+  "name": "tendra-mobile",
+  "private": true,
+  "description": "Emballage iOS / Android de Tendra avec Capacitor (voir docs/STORES.md)",
+  "scripts": {
+    "add:android": "npx cap add android",
+    "add:ios": "npx cap add ios",
+    "sync": "npx cap sync",
+    "open:android": "npx cap open android",
+    "open:ios": "npx cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "latest",
+    "@capacitor/android": "latest",
+    "@capacitor/ios": "latest",
+    "@capacitor/local-notifications": "latest",
+    "@revenuecat/purchases-capacitor": "latest"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "latest"
+  }
+}
